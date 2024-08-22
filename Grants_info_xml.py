@@ -26,10 +26,11 @@ def extract_information(data, funder_info):
                 for institution in investigator.get('institutions', []):
                     if institution.get('display_name', '') == 'Brandeis University':
                         author_name = author.get('display_name')
-                        Id_1 = get_user_identifier(author_name, filename='data/20240805_reseracherIDs.csv')
+                        Id_1 = get_user_barcode(author_name)
                         investigator_info = {
                             'investigatorId': Id_1,
-                            'investigatorIdType': 'primaryId'
+                            'investigatorIdType': '01',
+                            'investigatorRole': 'principle_invesitgator'
                         }
                         # If the investigator is found, break out of the loop
                         break
@@ -151,6 +152,28 @@ def get_first(name):
     name = split_name(name)
     return name[0]
 
+def format_name(name):
+    name = split_name(name)
+    formatted_name = ', '.join(reversed(name))
+    return formatted_name
+    
+def get_user_barcode(researcher_name, filename = 'data/Book2.xlsx'):
+    try:
+        # Load the Excel file
+        df = pd.read_excel(filename, dtype={'User Identifier 1': str})
+        matching_rows = df[df['Researcher Name'] == format_name(researcher_name)]
+        if not matching_rows.empty:
+            barcode = matching_rows.iloc[0]['User Identifier 1']
+            return barcode
+        else:
+            return None
+    except FileNotFoundError:
+        print(f"File not found: {filename}")
+        return None
+    except Exception as e:
+        print(f"Error reading the file {filename}: {e}")
+        return None
+    
 # Function to get user identifier  
 def get_user_identifier(researcher_name, filename='data/20240805_reseracherIDs.csv'):
     try:
@@ -225,6 +248,9 @@ def dict_to_xml(data):
                 
                 investigatorIdType_elem = ET.SubElement(investigator_elem, 'investigatorIdType')
                 investigatorIdType_elem.text = grant.get('investigatorIdType', 'N/A')
+
+                investigatorRole_elem = ET.SubElement(investigator_elem, 'investigatorRole')
+                investigatorRole_elem.text = grant.get('investigatorRole', 'N/A')   
                 
     return ET.ElementTree(root)
 
