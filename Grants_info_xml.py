@@ -18,23 +18,28 @@ def extract_information(data, funder_info):
         investigator_info = None
 
         # Loop through each investigator in the result
+        i = 0
         for investigator in result.get('authorships', []):
-            position = investigator.get('author_position', '')
-            author = investigator.get('author', '')
+            i = i + 1
+            if i <= 10:
+                position = investigator.get('author_position', '')
+                author = investigator.get('author', '')
             # Check if the investigator is the first author and is affiliated with Brandeis University
-            if position == 'first':
                 for institution in investigator.get('institutions', []):
                     if institution.get('display_name', '') == 'Brandeis University':
                         author_name = author.get('display_name')
                         Id_1 = get_user_barcode(author_name)
                         investigator_info = {
                             'investigatorId': Id_1,
-                            'investigatorIdType': '01',
-                            'investigatorRole': 'principle_invesitgator'
+                            'investigatorIdType': '01'
                         }
-                        # If the investigator is found, break out of the loop
+                        if position == 'first':
+                            position_info = {'investigatorRole': 'principal_investigator'}
+                        else:
+                            position_info = {'investigatorRole': 'co_investigator'}
+                        investigator_info.update(position_info)
+                    # If the investigator is found, break out of the loop
                         break
-                # Break out of the outer loop if we already have investigator info
                 if investigator_info:
                     break
         # Loop through each grant in the result
@@ -68,7 +73,7 @@ def extract_information(data, funder_info):
                     grants.append(grant_info)
 
         # Append the grants to the extracted data
-        if grants:
+        if investigator_info:
             extracted_data.append({'grants': grants})
 
     return extracted_data
@@ -261,11 +266,11 @@ def pretty_print_xml(tree):
     return reparsed.toprettyxml(indent="  ")
 
 # Input file names and the base url to used to get data from opealex
-base_url = input("Please enter the base URL: ")
+year = input("Please enter the year: ")
 openAlex_file_name = input("Please enter the output JSON file name (with .json extension and relative path): ")
 
 # Get data from openAlex
-get_data_openAlex(base_url, openAlex_file_name).get_data_openAlex()
+get_data_openAlex(year, openAlex_file_name).get_data_openAlex()
 
 funder_info = load_funder_info('data/funder_info.csv')
 
