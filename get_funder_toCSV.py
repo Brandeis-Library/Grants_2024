@@ -8,11 +8,8 @@ def similar(a, b):
 
 # Input file names
 input_file_name = input("Please enter the input JSON file name (with .json extension and relative path): ")
-base_url = input("Please enter the base URL: ")
 
-get_data_openAlex(base_url, input_file_name).get_data_openAlex()
-
-csv_file_name = 'data/funder-info.csv'
+csv_file_name = 'data/funder_info.csv'
 # Load JSON data
 with open(input_file_name, 'r') as json_file:
     data = json.load(json_file)
