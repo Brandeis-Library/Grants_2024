@@ -256,6 +256,8 @@ def dict_to_xml(data):
 
                 investigatorRole_elem = ET.SubElement(investigator_elem, 'investigatorRole')
                 investigatorRole_elem.text = grant.get('investigatorRole', 'N/A')   
+            #else:
+                #investigator_elem = ET.SubElement(grant_elem, 'investigator')
                 
     return ET.ElementTree(root)
 
